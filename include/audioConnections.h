@@ -5,6 +5,7 @@
 #ifndef Audio_Connections_h
 #define Audio_Connections_h
 
+#include "mixer.h"
 #include <Audio.h>
 #include <Wire.h>
 #include <SPI.h>
