@@ -36,7 +36,7 @@ jobs:
         platformio run
 
     # Step 5: 将生成的 HEX 文件保存为构建产物
-    - name: '⬆ Upload HEX file'z
+    - name: '⬆ Upload HEX file'
       uses: actions/upload-artifact@v3
       with:
         name: teensy32-hex
