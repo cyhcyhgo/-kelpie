@@ -43,6 +43,21 @@ jobs:
           path: .pio/build/teensy31/firmware.hex  # 上传 Teensy 3.2 的 HEX 文件
 
       # Step 6: 创建发布并上传 HEX 文件
+      - name: Delete old release
+        id: delete_old_release
+        run: |
+          # 获取旧版本的 Release 信息
+          old_releases=$(gh release list --json tagName -q '.[].tagName')
+          echo "Old releases: $old_releases"
+          
+          # 删除旧版本的 Release
+          if [[ $old_releases == *"v${{ steps.bump_version.outputs.new_version }}"* ]]; then
+            echo "Deleting old release v${{ steps.bump_version.outputs.new_version }}"
+            gh release delete "v${{ steps.bump_version.outputs.new_version }}" --confirm
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
