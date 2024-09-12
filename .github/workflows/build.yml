@@ -14,53 +14,53 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: 检出代码
-      - name: '⏳ Checkout repository'
-        uses: actions/checkout@v3
+    # Step 1: 检出代码
+    - name: '⏳ Checkout repository'
+      uses: actions/checkout@v3
 
-      # Step 2: 设置 Python 环境（PlatformIO 依赖）
-      - name: '🛠 Set up Python'
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.x'
-
-      # Step 3: 安装 PlatformIO
-      - name: '🤌 Install PlatformIO'
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install platformio
-
-      # Step 4: 编译工程文件
-      - name: '🏗 Compile PlatformIO Project'
-        run: |
-          platformio run
-
-      # Step 5: 将生成的 HEX 文件保存为构建产物
-      - name: '⬆ Upload HEX file'
-        uses: actions/upload-artifact@v3
-        with:
-          name: teensy32-hex
-          path: .pio/build/teensy31/firmware.hex  # 上传 Teensy 3.2 的 HEX 文件
-
-      # Step 6: 创建发布并上传 HEX 文件
-      - name: '🧹 Delete old release'
-        uses: dev-drprasad/delete-tag-and-release@v1.0.1
-        with:
-          delete_release: true
-          tag_name: development
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: '🔥 Create development release'
-      uses: softprops/action-gh-release@v1
+    # Step 2: 设置 Python 环境（PlatformIO 依赖）
+    - name: '🛠 Set up Python'
+      uses: actions/setup-python@v3
       with:
-        draft: false
-        name: Development Release
+        python-version: '3.x'
+
+    # Step 3: 安装 PlatformIO
+    - name: '🤌 Install PlatformIO'
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install platformio
+
+    # Step 4: 编译工程文件
+    - name: '🏗 Compile PlatformIO Project'
+      run: |
+        platformio run
+
+    # Step 5: 将生成的 HEX 文件保存为构建产物
+    - name: '⬆ Upload HEX file'z
+      uses: actions/upload-artifact@v3
+      with:
+        name: teensy32-hex
+        path: .pio/build/teensy31/firmware.hex  # 上传 Teensy 3.2 的 HEX 文件
+
+    # Step 6: 创建发布并上传 HEX 文件
+    - name: '🧹 Delete old release'
+      uses: dev-drprasad/delete-tag-and-release@v1.0.1
+      with:
+        delete_release: true
         tag_name: development
-        body: |
-            **⚠️ This is a development release, and it may be unstable.**
-            ${{steps.changelog.outputs.changelog}}
-        files: .pio/build/teensy31/firmware.hex
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: '🔥 Create development release'
+    uses: softprops/action-gh-release@v1
+    with:
+      draft: false
+      name: Development Release
+      tag_name: development
+      body: |
+          **⚠️ This is a development release, and it may be unstable.**
+          ${{steps.changelog.outputs.changelog}}
+      files: .pio/build/teensy31/firmware.hex
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
