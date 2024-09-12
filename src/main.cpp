@@ -4,7 +4,6 @@
 
 #include <Arduino.h>
 #include <MIDI.h>
-#include "mixer.h"
 #include <Audio.h>
 #include <audioConnections.h>
 #include <KelpieHelpers.h>
