@@ -1,0 +1,30 @@
+name: Build PlatformIO Project
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up PlatformIO
+        uses: platformio/action-install@v2.1.3
+
+      - name: Build Project
+        run: platformio run --environment teensy31
+
+      - name: Upload HEX File
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware
+          path: |
+            .pio/build/teensy31/firmware.hex
