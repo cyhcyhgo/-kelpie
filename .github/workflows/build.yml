@@ -1,4 +1,4 @@
-name: Build PlatformIO Project
+name: Build PlatformIO Project and Release
 
 on:
   push:
@@ -41,3 +41,25 @@ jobs:
         with:
           name: teensy32-hex
           path: .pio/build/teensy31/firmware.hex  # 上传 Teensy 3.2 的 HEX 文件
+
+      # Step 6: 创建发布并上传 HEX 文件
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: v1.0.0  # 你可以根据需要更改版本号
+          release_name: Release v1.0.0
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload HEX to Release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: .pio/build/teensy31/firmware.hex
+          asset_name: firmware.hex
+          asset_content_type: application/octet-stream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
