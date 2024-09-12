@@ -5,6 +5,12 @@
 #ifndef Audio_Connections_h
 #define Audio_Connections_h
 
+#include <Audio.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+#include <SerialFlash.h>
+
 
 // GUItool: begin automatically generated code
 AudioSynthNoiseWhite     V8_N;           //xy=572.2395629882812,1611.3333129882812
