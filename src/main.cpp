@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include <MIDI.h>
+#include <Audio.h>
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);  // Teensy 3.2 自带的 LED
