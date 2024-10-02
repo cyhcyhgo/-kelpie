@@ -27,7 +27,6 @@
  * THE SOFTWARE.
  */
 
-#include <Arduino.h>
 #include "effect_bitcrusher.h"
 
 void AudioEffectBitcrusher::update(void)

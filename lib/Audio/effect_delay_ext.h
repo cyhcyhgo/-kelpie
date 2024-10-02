@@ -26,8 +26,8 @@
 
 #ifndef effect_delay_ext_h_
 #define effect_delay_ext_h_
-#include <Arduino.h>     // github.com/PaulStoffregen/cores/blob/master/teensy4/Arduino.h
-#include <AudioStream.h> // github.com/PaulStoffregen/cores/blob/master/teensy4/AudioStream.h
+#include "Arduino.h"
+#include "AudioStream.h"
 #include "spi_interrupt.h"
 
 enum AudioEffectDelayMemoryType_t {
@@ -51,7 +51,7 @@ public:
 
 	void delay(uint8_t channel, float milliseconds) {
 		if (channel >= 8 || memory_type >= AUDIO_MEMORY_UNDEFINED) return;
-		if (milliseconds < 0.0f) milliseconds = 0.0f;
+		if (milliseconds < 0.0) milliseconds = 0.0;
 		uint32_t n = (milliseconds*(AUDIO_SAMPLE_RATE_EXACT/1000.0f))+0.5f;
 		n += AUDIO_BLOCK_SAMPLES;
 		if (n > memory_length - AUDIO_BLOCK_SAMPLES)

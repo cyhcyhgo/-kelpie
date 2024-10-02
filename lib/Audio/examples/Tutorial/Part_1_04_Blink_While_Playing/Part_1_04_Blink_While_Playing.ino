@@ -25,10 +25,10 @@ AudioControlSGTL5000     sgtl5000_1;
 
 // Use these with the Teensy Audio Shield
 #define SDCARD_CS_PIN    10
-#define SDCARD_MOSI_PIN  7   // Teensy 4 ignores this, uses pin 11
-#define SDCARD_SCK_PIN   14  // Teensy 4 ignores this, uses pin 13
+#define SDCARD_MOSI_PIN  7
+#define SDCARD_SCK_PIN   14
 
-// Use these with the Teensy 3.5 & 3.6 & 4.1 SD card
+// Use these with the Teensy 3.5 & 3.6 SD card
 //#define SDCARD_CS_PIN    BUILTIN_SDCARD
 //#define SDCARD_MOSI_PIN  11  // not actually used
 //#define SDCARD_SCK_PIN   13  // not actually used
@@ -37,9 +37,6 @@ AudioControlSGTL5000     sgtl5000_1;
 //#define SDCARD_CS_PIN    4
 //#define SDCARD_MOSI_PIN  11
 //#define SDCARD_SCK_PIN   13
-
-#define LED_PIN    5
-//#define LED_PIN 13
 
 void setup() {
   Serial.begin(9600);
@@ -54,7 +51,7 @@ void setup() {
       delay(500);
     }
   }
-  pinMode(LED_PIN, OUTPUT); // LED on pin 13
+  pinMode(13, OUTPUT); // LED on pin 13
   delay(1000);
 }
 
@@ -71,9 +68,9 @@ void loop() {
   Serial.println(" ms");
 
   // blink LED and print info while playing
-  digitalWrite(LED_PIN, HIGH);
+  digitalWrite(13, HIGH);
   delay(250);
-  digitalWrite(LED_PIN, LOW);
+  digitalWrite(13, LOW);
   delay(250);
 
   // read the knob position (analog input A2)

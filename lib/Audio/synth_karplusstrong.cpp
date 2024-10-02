@@ -24,10 +24,8 @@
  * THE SOFTWARE.
  */
 
-#include <Arduino.h>
 #include "synth_karplusstrong.h"
 
-#if defined(KINETISK) || defined(__IMXRT1062__)
 static uint32_t pseudorand(uint32_t lo)
 {
 	uint32_t hi;
@@ -39,12 +37,10 @@ static uint32_t pseudorand(uint32_t lo)
 	lo = (lo & 0x7FFFFFFF) + (lo >> 31);
 	return lo;
 }
-#endif
 
 
 void AudioSynthKarplusStrong::update(void)
 {
-#if defined(KINETISK) || defined(__IMXRT1062__)
 	audio_block_t *block;
 
 	if (state == 0) return;
@@ -85,7 +81,6 @@ void AudioSynthKarplusStrong::update(void)
 
 	transmit(block);
 	release(block);
-#endif
 }
 
 

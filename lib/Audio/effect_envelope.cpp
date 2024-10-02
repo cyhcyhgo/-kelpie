@@ -24,7 +24,6 @@
  * THE SOFTWARE.
  */
 
-#include <Arduino.h>
 #include "effect_envelope.h"
 
 #define STATE_IDLE	0
@@ -76,23 +75,15 @@ void AudioEffectEnvelope::update(void)
 	uint32_t sample12, sample34, sample56, sample78, tmp1, tmp2;
 
 	block = receiveWritable();
-	if (block)
-	{
-		if (state == STATE_IDLE) {
-			AudioStream::release(block);
-			return;
-		}
-		p = (uint32_t *)(block->data);
+	if (!block) return;
+	if (state == STATE_IDLE) {
+		release(block);
+		return;
 	}
-	else
-		p = NULL;
-	
+	p = (uint32_t *)(block->data);
 	end = p + AUDIO_BLOCK_SAMPLES/2;
 
-	// need to run the envelope process even with silent data, or
-	// it gets stuck and never goes idle:
-	while (p < end) 
-	{
+	while (p < end) {
 		// we only care about the state when completing a region
 		if (count == 0) {
 			if (state == STATE_ATTACK) {
@@ -122,15 +113,10 @@ void AudioEffectEnvelope::update(void)
 			} else if (state == STATE_RELEASE) {
 				state = STATE_IDLE;
 				while (p < end) {
-					if (nullptr != block) // because p doesn't stay null!
-					{
-						*p++ = 0;
-						*p++ = 0;
-						*p++ = 0;
-						*p++ = 0;
-					}
-					else
-						p += 4;
+					*p++ = 0;
+					*p++ = 0;
+					*p++ = 0;
+					*p++ = 0;
 				}
 				break;
 			} else if (state == STATE_FORCED) {
@@ -152,66 +138,44 @@ void AudioEffectEnvelope::update(void)
 			}
 		}
 
-		if (nullptr != block)
-		{
-			int32_t mult = mult_hires >> 14;
-			int32_t inc = inc_hires >> 17;
-			// process 8 samples, using only mult and inc (16 bit resolution)
-			sample12 = *p++;
-			sample34 = *p++;
-			sample56 = *p++;
-			sample78 = *p++;
-			p -= 4;
-			mult += inc;
-			tmp1 = signed_multiply_32x16b(mult, sample12);
-			mult += inc;
-			tmp2 = signed_multiply_32x16t(mult, sample12);
-			sample12 = pack_16b_16b(tmp2, tmp1);
-			mult += inc;
-			tmp1 = signed_multiply_32x16b(mult, sample34);
-			mult += inc;
-			tmp2 = signed_multiply_32x16t(mult, sample34);
-			sample34 = pack_16b_16b(tmp2, tmp1);
-			mult += inc;
-			tmp1 = signed_multiply_32x16b(mult, sample56);
-			mult += inc;
-			tmp2 = signed_multiply_32x16t(mult, sample56);
-			sample56 = pack_16b_16b(tmp2, tmp1);
-			mult += inc;
-			tmp1 = signed_multiply_32x16b(mult, sample78);
-			mult += inc;
-			tmp2 = signed_multiply_32x16t(mult, sample78);
-			sample78 = pack_16b_16b(tmp2, tmp1);
-			*p++ = sample12;
-			*p++ = sample34;
-			*p++ = sample56;
-			*p++ = sample78;
-			// adjust the long-term gain using 30 bit resolution (fix #102)
-			// https://github.com/PaulStoffregen/Audio/issues/102
-		}
-		else
-			p += 4;
+		int32_t mult = mult_hires >> 14;
+		int32_t inc = inc_hires >> 17;
+		// process 8 samples, using only mult and inc (16 bit resolution)
+		sample12 = *p++;
+		sample34 = *p++;
+		sample56 = *p++;
+		sample78 = *p++;
+		p -= 4;
+		mult += inc;
+		tmp1 = signed_multiply_32x16b(mult, sample12);
+		mult += inc;
+		tmp2 = signed_multiply_32x16t(mult, sample12);
+		sample12 = pack_16b_16b(tmp2, tmp1);
+		mult += inc;
+		tmp1 = signed_multiply_32x16b(mult, sample34);
+		mult += inc;
+		tmp2 = signed_multiply_32x16t(mult, sample34);
+		sample34 = pack_16b_16b(tmp2, tmp1);
+		mult += inc;
+		tmp1 = signed_multiply_32x16b(mult, sample56);
+		mult += inc;
+		tmp2 = signed_multiply_32x16t(mult, sample56);
+		sample56 = pack_16b_16b(tmp2, tmp1);
+		mult += inc;
+		tmp1 = signed_multiply_32x16b(mult, sample78);
+		mult += inc;
+		tmp2 = signed_multiply_32x16t(mult, sample78);
+		sample78 = pack_16b_16b(tmp2, tmp1);
+		*p++ = sample12;
+		*p++ = sample34;
+		*p++ = sample56;
+		*p++ = sample78;
+		// adjust the long-term gain using 30 bit resolution (fix #102)
+		// https://github.com/PaulStoffregen/Audio/issues/102
 		mult_hires += inc_hires;
 		count--;
 	}
-	if (nullptr != block)
-	{
-		transmit(block);
-		AudioStream::release(block);
-	}
-}
-
-bool AudioEffectEnvelope::isActive()
-{
-	uint8_t current_state = *(volatile uint8_t *)&state;
-	if (current_state == STATE_IDLE) return false;
-	return true;
-}
-
-bool AudioEffectEnvelope::isSustain()
-{
-	uint8_t current_state = *(volatile uint8_t *)&state;
-	if (current_state == STATE_SUSTAIN) return true;
-	return false;
+	transmit(block);
+	release(block);
 }
 

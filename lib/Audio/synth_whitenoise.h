@@ -26,8 +26,8 @@
 
 #ifndef synth_whitenoise_h_
 #define synth_whitenoise_h_
-#include <Arduino.h>     // github.com/PaulStoffregen/cores/blob/master/teensy4/Arduino.h
-#include <AudioStream.h> // github.com/PaulStoffregen/cores/blob/master/teensy4/AudioStream.h
+#include "Arduino.h"
+#include "AudioStream.h"
 #include "utility/dspinst.h"
 
 class AudioSynthNoiseWhite : public AudioStream
@@ -38,9 +38,9 @@ public:
 		seed = 1 + instance_count++;
 	}
 	void amplitude(float n) {
-		if (n < 0.0f) n = 0.0;
-		else if (n > 1.0f) n = 1.0f;
-		level = (int32_t)(n * 65536.0f);
+		if (n < 0.0) n = 0.0;
+		else if (n > 1.0) n = 1.0;
+		level = (int32_t)(n * 65536.0);
 	}
 	virtual void update(void);
 private:

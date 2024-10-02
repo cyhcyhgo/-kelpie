@@ -20,7 +20,6 @@
  * THE SOFTWARE.
  */
 
-#include <Arduino.h>
 #include "effect_chorus.h"
 
 /******************************************************************/

@@ -20,7 +20,6 @@
  * THE SOFTWARE.
  */
 
-#include <Arduino.h>
 #include "synth_tonesweep.h"
 #include "arm_math.h"
 
@@ -55,7 +54,7 @@ if(0) {
   if(t_hi < 1)return false;
   if(t_hi >= (int) AUDIO_SAMPLE_RATE_EXACT / 2)return false;
   if(t_lo >= (int) AUDIO_SAMPLE_RATE_EXACT / 2)return false;
-  if(t_time <= 0)return false;
+  if(t_time < 0)return false;
   tone_lo = t_lo;
   tone_hi = t_hi;
   tone_phase = 0;
@@ -87,6 +86,7 @@ unsigned char AudioSynthToneSweep::isPlaying(void)
 void AudioSynthToneSweep::update(void)
 {
   audio_block_t *block;
+  short *bp;
   int i;
   
   if(!sweep_busy)return;
@@ -94,15 +94,15 @@ void AudioSynthToneSweep::update(void)
   //          L E F T  C H A N N E L  O N L Y
   block = allocate();
   if(block) {
+    bp = block->data;
     uint32_t tmp  = tone_freq >> 32; 
-    uint64_t tone_tmp = (tone_freq << 14) / (int) AUDIO_SAMPLE_RATE_EXACT;
-    uint64_t incr     = (tone_incr << 14) / (int) AUDIO_SAMPLE_RATE_EXACT;
+    uint64_t tone_tmp = (0x400000000000LL * (int)(tmp&0x7fffffff)) / (int) AUDIO_SAMPLE_RATE_EXACT;
     // Generate the sweep
     for(i = 0;i < AUDIO_BLOCK_SAMPLES;i++) {
-      block->data[i] = (short)(( (short)(arm_sin_q31((uint32_t)((tone_phase >> 15)&0x7fffffff))>>16) *tone_amp) >> 15);
+      *bp++ = (short)(( (short)(arm_sin_q31((uint32_t)((tone_phase >> 15)&0x7fffffff))>>16) *tone_amp) >> 16);
 
       tone_phase +=  tone_tmp;
-      tone_tmp   +=  incr ;
+      if(tone_phase & 0x800000000000LL)tone_phase &= 0x7fffffffffffLL;
 
       if(tone_sign > 0) {
         if(tmp > tone_hi) {
@@ -111,7 +111,7 @@ void AudioSynthToneSweep::update(void)
         }
         tone_freq += tone_incr;
       } else {
-        if(tmp < tone_hi || tone_freq < tone_incr) {
+        if(tmp < tone_hi) {
           sweep_busy = 0;
 
           break;
@@ -120,7 +120,7 @@ void AudioSynthToneSweep::update(void)
       }
     }
     while(i < AUDIO_BLOCK_SAMPLES) {
-      block->data[i] = 0;
+      *bp++ = 0;
       i++;
     }    
     // send the samples to the left channel

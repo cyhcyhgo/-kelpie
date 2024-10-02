@@ -24,7 +24,6 @@
  * THE SOFTWARE.
  */
 
-#include <Arduino.h>
 #include "filter_variable.h"
 #include "utility/dspinst.h"
 
@@ -46,7 +45,7 @@
 // no audible difference.
 //#define IMPROVE_EXPONENTIAL_ACCURACY
 
-#if defined(__ARM_ARCH_7EM__)
+#if defined(KINETISK) || defined(__SAMD51__)
 
 void AudioFilterStateVariable::update_fixed(const int16_t *in,
 	int16_t *lp, int16_t *bp, int16_t *hp)
@@ -120,7 +119,7 @@ void AudioFilterStateVariable::update_variable(const int16_t *in,
 		n = n << 1;
 		#else
 		// exp2 algorithm by Laurent de Soras
-		// https://www.musicdsp.org/en/latest/Other/106-fast-exp2-approximation.html
+		// http://www.musicdsp.org/showone.php?id=106
 		n = (n + 134217728) << 3;
 		n = multiply_32x32_rshift32_rounded(n, n);
 		n = multiply_32x32_rshift32_rounded(n, 715827883) << 3;

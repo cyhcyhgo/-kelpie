@@ -24,14 +24,12 @@
  * THE SOFTWARE.
  */
 
-#include <Arduino.h>
 #include "analyze_fft1024.h"
 #include "sqrt_integer.h"
 #include "utility/dspinst.h"
 
 
 // 140312 - PAH - slightly faster copy
-#if defined(__ARM_ARCH_7EM__)
 static void copy_to_fft_buffer(void *destination, const void *source)
 {
 	const uint16_t *src = (const uint16_t *)source;
@@ -55,7 +53,6 @@ static void apply_window_to_fft_buffer(void *buffer, const void *window)
 	}
 
 }
-#endif
 
 void AudioAnalyzeFFT1024::update(void)
 {
@@ -64,7 +61,7 @@ void AudioAnalyzeFFT1024::update(void)
 	block = receiveReadOnly();
 	if (!block) return;
 
-#if defined(__ARM_ARCH_7EM__)
+#if defined(KINETISK) || defined(__SAMD51__)
 	switch (state) {
 	case 0:
 		blocklist[0] = block;

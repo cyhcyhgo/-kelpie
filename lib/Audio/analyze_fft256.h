@@ -27,9 +27,9 @@
 #ifndef analyze_fft256_h_
 #define analyze_fft256_h_
 
-#include <Arduino.h>     // github.com/PaulStoffregen/cores/blob/master/teensy4/Arduino.h
-#include <AudioStream.h> // github.com/PaulStoffregen/cores/blob/master/teensy4/AudioStream.h
-#include <arm_math.h>    // github.com/PaulStoffregen/cores/blob/master/teensy4/arm_math.h
+#include "Arduino.h"
+#include "AudioStream.h"
+#include "arm_math.h"
 
 // windows.c
 extern "C" {
@@ -70,7 +70,7 @@ public:
 	}
 	float read(unsigned int binNumber) {
 		if (binNumber > 127) return 0.0;
-		return (float)(output[binNumber]) * (1.0f / 16384.0f);
+		return (float)(output[binNumber]) * (1.0 / 16384.0);
 	}
 	float read(unsigned int binFirst, unsigned int binLast) {
 		if (binFirst > binLast) {
@@ -84,7 +84,7 @@ public:
 		do {
 			sum += output[binFirst++];
 		} while (binFirst <= binLast);
-		return (float)sum * (1.0f / 16384.0f);
+		return (float)sum * (1.0 / 16384.0);
 	}
 	void averageTogether(uint8_t n) {
 #if AUDIO_BLOCK_SAMPLES == 128

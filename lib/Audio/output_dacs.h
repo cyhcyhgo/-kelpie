@@ -27,9 +27,36 @@
 #ifndef output_dacs_h_
 #define output_dacs_h_
 
-#include <Arduino.h>     // github.com/PaulStoffregen/cores/blob/master/teensy4/Arduino.h
-#include <AudioStream.h> // github.com/PaulStoffregen/cores/blob/master/teensy4/AudioStream.h
-#include <DMAChannel.h>  // github.com/PaulStoffregen/cores/blob/master/teensy4/DMAChannel.h
+#include "Arduino.h"
+#include "AudioStream.h"
+
+#if defined(ARDUINO_ARCH_SAMD)
+
+#include "Adafruit_ZeroDMA.h"
+
+class AudioOutputAnalogStereo : public AudioStream
+{
+	public:
+	AudioOutputAnalogStereo(void) : AudioStream(2, inputQueueArray) { begin(); }
+	virtual void update(void);
+	void begin(void);
+	void analogReference(int ref);
+	private:
+	static audio_block_t *block_left_1st;
+	static audio_block_t *block_left_2nd;
+	static audio_block_t *block_right_1st;
+	static audio_block_t *block_right_2nd;
+	static audio_block_t block_silent;
+	static bool update_responsibility;
+	audio_block_t *inputQueueArray[2];
+	static Adafruit_ZeroDMA *dma0;
+	static DmacDescriptor *desc;
+	static void isr(Adafruit_ZeroDMA *dma);
+};
+
+#else //teensy
+
+#include "DMAChannel.h"
 
 class AudioOutputAnalogStereo : public AudioStream
 {
@@ -49,5 +76,7 @@ private:
 	static DMAChannel dma;
 	static void isr(void);
 };
+
+#endif
 
 #endif

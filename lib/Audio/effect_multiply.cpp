@@ -24,12 +24,11 @@
  * THE SOFTWARE.
  */
 
-#include <Arduino.h>
 #include "effect_multiply.h"
 
 void AudioEffectMultiply::update(void)
 {
-#if defined(__ARM_ARCH_7EM__)
+#if defined(KINETISK) || defined(__SAMD51__)
 	audio_block_t *blocka, *blockb;
 	uint32_t *pa, *pb, *end;
 	uint32_t a12, a34; //, a56, a78;
