@@ -27,9 +27,9 @@
 #ifndef analyze_fft1024_h_
 #define analyze_fft1024_h_
 
-#include "Arduino.h"
-#include "AudioStream.h"
-#include "arm_math.h"
+#include <Arduino.h>     // github.com/PaulStoffregen/cores/blob/master/teensy4/Arduino.h
+#include <AudioStream.h> // github.com/PaulStoffregen/cores/blob/master/teensy4/AudioStream.h
+#include <arm_math.h>    // github.com/PaulStoffregen/cores/blob/master/teensy4/arm_math.h
 
 // windows.c
 extern "C" {
@@ -62,7 +62,7 @@ public:
 	}
 	float read(unsigned int binNumber) {
 		if (binNumber > 511) return 0.0;
-		return (float)(output[binNumber]) * (1.0 / 16384.0);
+		return (float)(output[binNumber]) * (1.0f / 16384.0f);
 	}
 	float read(unsigned int binFirst, unsigned int binLast) {
 		if (binFirst > binLast) {
@@ -76,7 +76,7 @@ public:
 		do {
 			sum += output[binFirst++];
 		} while (binFirst <= binLast);
-		return (float)sum * (1.0 / 16384.0);
+		return (float)sum * (1.0f / 16384.0f);
 	}
 	void averageTogether(uint8_t n) {
 		// not implemented yet (may never be, 86 Hz output rate is ok)

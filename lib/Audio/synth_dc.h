@@ -26,14 +26,14 @@
 
 #ifndef synth_dc_h_
 #define synth_dc_h_
-#include "Arduino.h"
-#include "AudioStream.h"
+#include <Arduino.h>     // github.com/PaulStoffregen/cores/blob/master/teensy4/Arduino.h
+#include <AudioStream.h> // github.com/PaulStoffregen/cores/blob/master/teensy4/AudioStream.h
 #include "utility/dspinst.h"
 
 // compute (a - b) / c
 // handling 32 bit interger overflow at every step
 // without resorting to slow 64 bit math
-#if defined(KINETISK) || defined(__SAMD51__)
+#if defined(__ARM_ARCH_7EM__)
 static inline int32_t substract_int32_then_divide_int32(int32_t a, int32_t b, int32_t c) __attribute__((always_inline, unused));
 static inline int32_t substract_int32_then_divide_int32(int32_t a, int32_t b, int32_t c)
 {
@@ -91,9 +91,9 @@ public:
 	AudioSynthWaveformDc() : AudioStream(0, NULL), state(0), magnitude(0) {}
 	// immediately jump to the new DC level
 	void amplitude(float n) {
-		if (n > 1.0) n = 1.0;
-		else if (n < -1.0) n = -1.0;
-		int32_t m = (int32_t)(n * 2147418112.0);
+		if (n > 1.0f) n = 1.0f;
+		else if (n < -1.0f) n = -1.0f;
+		int32_t m = (int32_t)(n * 2147418112.0f);
 		__disable_irq();
 		magnitude = m;
 		state = 0;
@@ -101,18 +101,18 @@ public:
 	}
 	// slowly transition to the new DC level
 	void amplitude(float n, float milliseconds) {
-		if (milliseconds <= 0.0) {
+		if (milliseconds <= 0.0f) {
 			amplitude(n);
 			return;
 		}
-		if (n > 1.0) n = 1.0;
-		else if (n < -1.0) n = -1.0;
-		int32_t c = (int32_t)(milliseconds*(AUDIO_SAMPLE_RATE_EXACT/1000.0));
+		if (n > 1.0f) n = 1.0f;
+		else if (n < -1.0f) n = -1.0f;
+		int32_t c = (int32_t)(milliseconds*(AUDIO_SAMPLE_RATE_EXACT/1000.0f));
 		if (c == 0) {
 			amplitude(n);
 			return;
 		}
-		int32_t t = (int32_t)(n * 2147418112.0);
+		int32_t t = (int32_t)(n * 2147418112.0f);
 		__disable_irq();
 		target = t;
 		if (target == magnitude) {
@@ -129,7 +129,7 @@ public:
 	}
 	float read(void) {
 		int32_t m = magnitude;
-		return (float)m * (1.0 / 2147418112.0);
+		return (float)m * (float)(1.0 / 2147418112.0);
 	}
 	virtual void update(void);
 private:

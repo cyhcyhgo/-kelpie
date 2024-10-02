@@ -27,26 +27,38 @@
 #ifndef play_queue_h_
 #define play_queue_h_
 
-#include "Arduino.h"
-#include "AudioStream.h"
+#include <Arduino.h>     // github.com/PaulStoffregen/cores/blob/master/teensy4/Arduino.h
+#include <AudioStream.h> // github.com/PaulStoffregen/cores/blob/master/teensy4/AudioStream.h
 
 class AudioPlayQueue : public AudioStream
 {
+private:
+#if defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__)
+	static const unsigned int MAX_BUFFERS = 80;
+#else
+	static const unsigned int MAX_BUFFERS = 32;
+#endif
 public:
 	AudioPlayQueue(void) : AudioStream(0, NULL),
-		userblock(NULL), head(0), tail(0) { }
-	void play(int16_t data);
-	void play(const int16_t *data, uint32_t len);
+	  userblock(NULL), uptr(0), head(0), tail(0), max_buffers(MAX_BUFFERS) { }
+	uint32_t play(int16_t data);
+	uint32_t play(const int16_t *data, uint32_t len);
 	bool available(void);
 	int16_t * getBuffer(void);
-	void playBuffer(void);
+	uint32_t playBuffer(void);
 	void stop(void);
+	void setMaxBuffers(uint8_t);
 	//bool isPlaying(void) { return playing; }
 	virtual void update(void);
+	enum behaviour_e {ORIGINAL,NON_STALLING};
+	void setBehaviour(behaviour_e behave) {behaviour = behave;}
 private:
-	audio_block_t *queue[32];
+	audio_block_t *queue[MAX_BUFFERS];
 	audio_block_t *userblock;
+	unsigned int uptr; // actually an index, NOT a pointer!
 	volatile uint8_t head, tail;
+	volatile uint8_t max_buffers;
+	behaviour_e behaviour;
 };
 
 #endif

@@ -52,7 +52,7 @@ int pcm_mode=0;
 
 void wav2c(FILE *in, FILE *out, FILE *outh)
 {
-	uint32_t header[5];
+	uint32_t header[4];
 	int16_t format, channels, bits;
 	uint32_t rate;
 	uint32_t i, length, padlength=0, arraylen;
@@ -60,14 +60,18 @@ void wav2c(FILE *in, FILE *out, FILE *outh)
 	int32_t audio=0;
 
 	// read the WAV file's header
-	for (i=0; i<5; i++) {
+	for (i=0; i < 4; i++) {
 		header[i] = read_uint32(in);
 	}
-	chunkSize = header[4];
-	if (header[0] != 0x46464952 || header[2] != 0x45564157
-	  || header[3] != 0x20746D66 || !(chunkSize == 16 || chunkSize == 18 || chunkSize == 40)) {
-		 die("error in format of file %s", filename);
+	while (header[3] != 0x20746D66) {
+		// skip past unknown sections until "fmt "
+		chunkSize = read_uint32(in);
+		for (i=0; i < chunkSize; i++) {
+			read_uint8(in);
+		}
+		header[3] = read_uint32(in);
 	}
+	chunkSize = read_uint32(in);
 
 	// read the audio format parameters
 	format = read_int16(in);
@@ -135,10 +139,10 @@ void wav2c(FILE *in, FILE *out, FILE *outh)
 	total_length += arraylen;
 
 	// output a minimal header, just the length, #bits and sample rate
-	fprintf(outh, "extern const unsigned int AudioSample%s[%d];\n", samplename, arraylen);
+	fprintf(outh, "extern const unsigned int AudioSample%s[%d];\n", samplename, arraylen);	
 	fprintf(out, "// Converted from %s, using %d Hz, %s encoding\n", filename, rate,
 	  (pcm_mode ? "16 bit PCM" : "u-law"));
-	fprintf(out, "const unsigned int AudioSample%s[%d] = {\n", samplename, arraylen);
+	fprintf(out, "PROGMEM const unsigned int AudioSample%s[%d] = {\n", samplename, arraylen);
 	fprintf(out, "0x%08X,", length | (format << 24));
 	wcount = 1;
 
@@ -192,7 +196,7 @@ uint8_t ulaw_encode(int16_t audio)
 	if (mag >= 0x0400) return neg | 0x30 | ((mag >> 6) & 0x0F);   // 0000 01wx yz00 0000
 	if (mag >= 0x0200) return neg | 0x20 | ((mag >> 5) & 0x0F);   // 0000 001w xyz0 0000
 	if (mag >= 0x0100) return neg | 0x10 | ((mag >> 4) & 0x0F);   // 0000 0001 wxyz 0000
-	                   return neg | 0x00 | ((mag >> 3) & 0x0F);   // 0000 0000 1wxy z000
+	else               return neg | 0x00 | ((mag >> 3) & 0x0F);   // 0000 0000 1wxy z000
 }
 
 
@@ -287,6 +291,7 @@ int main(int argc, char **argv)
 		if (outh == NULL) die("unable to write %s\n", buf);
 		fprintf(outh, "%s", title);
 		fprintf(outc, "%s", title);
+		fprintf(outc, "#include <Arduino.h>\n");
 		fprintf(outc, "#include \"%s\"\n\n", buf);
 		wav2c(fp, outc, outh);
 		//wav2c(fp, stdout, stdout);
@@ -349,4 +354,3 @@ void die(const char *format, ...)
 	fprintf(stderr, "\n");
 	exit(1);
 }
-

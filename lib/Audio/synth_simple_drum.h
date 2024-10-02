@@ -28,7 +28,7 @@
 
 #ifndef _SYNTH_SIMPLE_DRUM_H_
 #define _SYNTH_SIMPLE_DRUM_H_
-#include "AudioStream.h"
+#include <AudioStream.h>     // github.com/PaulStoffregen/cores/blob/master/teensy4/Arduino.h
 #include "utility/dspinst.h"
 
 class AudioSynthSimpleDrum : public AudioStream
@@ -47,12 +47,12 @@ public:
 
   void frequency(float freq)
   {
-    if(freq < 0.0)
+    if(freq < 0.0f)
       freq = 0;
-    else if(freq > (AUDIO_SAMPLE_RATE_EXACT/2))
-      freq = AUDIO_SAMPLE_RATE_EXACT/2;
+    else if(freq > (AUDIO_SAMPLE_RATE_EXACT/2.0f))
+      freq = AUDIO_SAMPLE_RATE_EXACT/2.0f;
 
-    wav_increment = (freq * (0x7fffffffLL/AUDIO_SAMPLE_RATE_EXACT)) + 0.5;
+    wav_increment = (freq * (0x7fffffffLL/AUDIO_SAMPLE_RATE_EXACT)) + 0.5f;
   }
 
   void length(int32_t milliseconds)
@@ -62,7 +62,7 @@ public:
     if(milliseconds > 5000)
       milliseconds = 5000;
 
-    int32_t len_samples = milliseconds*(AUDIO_SAMPLE_RATE_EXACT/1000.0);
+    int32_t len_samples = milliseconds*(AUDIO_SAMPLE_RATE_EXACT/1000.0f);
 
     env_decrement = (0x7fff0000/len_samples);
   };

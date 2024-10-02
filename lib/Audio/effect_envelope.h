@@ -26,11 +26,11 @@
 
 #ifndef effect_envelope_h_
 #define effect_envelope_h_
-#include "Arduino.h"
-#include "AudioStream.h"
+#include <Arduino.h>     // github.com/PaulStoffregen/cores/blob/master/teensy4/Arduino.h
+#include <AudioStream.h> // github.com/PaulStoffregen/cores/blob/master/teensy4/AudioStream.h
 #include "utility/dspinst.h"
 
-#define SAMPLES_PER_MSEC (AUDIO_SAMPLE_RATE_EXACT/1000.0)
+#define SAMPLES_PER_MSEC (AUDIO_SAMPLE_RATE_EXACT/1000.0f)
 
 class AudioEffectEnvelope : public AudioStream
 {
@@ -62,9 +62,9 @@ public:
 		if (decay_count == 0) decay_count = 1;
 	}
 	void sustain(float level) {
-		if (level < 0.0) level = 0;
-		else if (level > 1.0) level = 1.0;
-		sustain_mult = level * 1073741824.0;
+		if (level < 0.0f) level = 0;
+		else if (level > 1.0f) level = 1.0f;
+		sustain_mult = level * 1073741824.0f;
 	}
 	void release(float milliseconds) {
 		release_count = milliseconds2count(milliseconds);
@@ -74,11 +74,12 @@ public:
 		release_forced_count = milliseconds2count(milliseconds);
 		if (release_count == 0) release_count = 1;
 	}
-	using AudioStream::release;
+	bool isActive();
+	bool isSustain();
 	virtual void update(void);
 private:
 	uint16_t milliseconds2count(float milliseconds) {
-		if (milliseconds < 0.0) milliseconds = 0.0;
+		if (milliseconds < 0.0f) milliseconds = 0.0f;
 		uint32_t c = ((uint32_t)(milliseconds*SAMPLES_PER_MSEC)+7)>>3;
 		if (c > 65535) c = 65535; // allow up to 11.88 seconds
 		return c;

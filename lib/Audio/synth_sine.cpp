@@ -24,6 +24,7 @@
  * THE SOFTWARE.
  */
 
+#include <Arduino.h>
 #include "synth_sine.h"
 #include "utility/dspinst.h"
 
@@ -51,7 +52,7 @@ void AudioSynthWaveformSine::update(void)
 				scale = (ph >> 8) & 0xFFFF;
 				val2 *= scale;
 				val1 *= 0x10000 - scale;
-#if defined(KINETISK) || defined(__SAMD51__)
+#if defined(__ARM_ARCH_7EM__)
 				block->data[i] = multiply_32x32_rshift32(val1 + val2, magnitude);
 #elif defined(KINETISL)
 				block->data[i] = (((val1 + val2) >> 16) * magnitude) >> 16;
@@ -71,10 +72,11 @@ void AudioSynthWaveformSine::update(void)
 
 
 
-#if defined(KINETISK) || defined(__SAMD51__)
+#if defined(__ARM_ARCH_7EM__)
 // High accuracy 11th order Taylor Series Approximation
 // input is 0 to 0xFFFFFFFF, representing 0 to 360 degree phase
 // output is 32 bit signed integer, top 25 bits should be very good
+//  https://www.pjrc.com/high-precision-sine-wave-synthesis-using-taylor-series/
 static int32_t taylor(uint32_t ph)
 {
 	int32_t angle, sum, p1, p2, p3, p5, p7, p9, p11;
@@ -98,12 +100,14 @@ static int32_t taylor(uint32_t ph)
 	sum = multiply_subtract_32x32_rshift32_rounded(sum, p11, 881443);
 	return sum <<= 1;                                                 // return:  1.31
 }
+// alternate forms which might be more efficient?
+// https://twitter.com/josyboelen/status/1148227258693431296
 #endif
 
 
 void AudioSynthWaveformSineHires::update(void)
 {
-#if defined(KINETISK) || defined(__SAMD51__)
+#if defined(__ARM_ARCH_7EM__)
 	audio_block_t *msw, *lsw;
 	uint32_t i, ph, inc;
 	int32_t val;
@@ -137,7 +141,7 @@ void AudioSynthWaveformSineHires::update(void)
 
 
 
-#if defined(KINETISK) || defined(__SAMD51__)
+#if defined(__ARM_ARCH_7EM__)
 
 void AudioSynthWaveformSineModulated::update(void)
 {
@@ -192,7 +196,7 @@ void AudioSynthWaveformSineModulated::update(void)
 			scale = (ph >> 8) & 0xFFFF;
 			val2 *= scale;
 			val1 *= 0x10000 - scale;
-			block->data[i] = (val1 + val2) >> 16;
+			block->data[i] = multiply_32x32_rshift32(val1 + val2, magnitude);
 			ph += inc;
 		}
 	}

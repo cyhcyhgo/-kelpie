@@ -24,10 +24,11 @@
  * THE SOFTWARE.
  */
 
+#include <Arduino.h>
 #include "analyze_tonedetect.h"
 #include "utility/dspinst.h"
 
-#if defined(KINETISK) || defined(__SAMD51__)
+#if defined(__ARM_ARCH_7EM__)
 
 static inline int32_t multiply_32x32_rshift30(int32_t a, int32_t b) __attribute__((always_inline));
 static inline int32_t multiply_32x32_rshift30(int32_t a, int32_t b)
@@ -166,5 +167,13 @@ void AudioAnalyzeToneDetect::update(void)
 	if (block) release(block);
 }
 
+void AudioAnalyzeToneDetect::set_params(int32_t coef, uint16_t cycles, uint16_t len)
+{
+}
+
+float AudioAnalyzeToneDetect::read(void)
+{
+	return 0;
+}
 #endif
 

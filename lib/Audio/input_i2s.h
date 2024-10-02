@@ -27,43 +27,9 @@
 #ifndef _input_i2s_h_
 #define _input_i2s_h_
 
-#include "Arduino.h"
-#include "AudioStream.h"
-
-#if defined(ARDUINO_ARCH_SAMD)
-
-#include "Adafruit_ZeroDMA.h"
-
-class AudioInputI2S : public AudioStream
-{
-public:
-	AudioInputI2S(void) : AudioStream(0, NULL) { begin(); }
-	virtual void update(void);
-	void begin(void);
-protected:
-	AudioInputI2S(int dummy): AudioStream(0, NULL) {} // to be used only inside AudioInputI2Sslave !!
-	static bool update_responsibility;
-	static Adafruit_ZeroDMA *dma;
-	static DmacDescriptor *desc;
-	static void isr(Adafruit_ZeroDMA *dma);
-private:
-	static audio_block_t *block_left;
-	static audio_block_t *block_right;
-	static uint16_t block_offset;
-};
-
-
-class AudioInputI2Sslave : public AudioInputI2S
-{
-public:
-	AudioInputI2Sslave(void) : AudioInputI2S(0) { begin(); }
-	void begin(void);
-	friend void dma_ch1_isr(void);
-};
-
-#else
-
-#include "DMAChannel.h"
+#include <Arduino.h>     // github.com/PaulStoffregen/cores/blob/master/teensy4/Arduino.h
+#include <AudioStream.h> // github.com/PaulStoffregen/cores/blob/master/teensy4/AudioStream.h
+#include <DMAChannel.h>  // github.com/PaulStoffregen/cores/blob/master/teensy4/DMAChannel.h
 
 class AudioInputI2S : public AudioStream
 {
@@ -74,12 +40,22 @@ public:
 protected:	
 	AudioInputI2S(int dummy): AudioStream(0, NULL) {} // to be used only inside AudioInputI2Sslave !!
 	static bool update_responsibility;
+
+#if !defined(KINETISL)
 	static DMAChannel dma;
 	static void isr(void);
+#else
+	static DMAChannel dma1, dma2;
+	static void isr1(void);
+	static void isr2(void);
+#endif
+
 private:
 	static audio_block_t *block_left;
 	static audio_block_t *block_right;
+#if !defined(KINETISL)	
 	static uint16_t block_offset;
+#endif	
 };
 
 
@@ -87,10 +63,7 @@ class AudioInputI2Sslave : public AudioInputI2S
 {
 public:
 	AudioInputI2Sslave(void) : AudioInputI2S(0) { begin(); }
-	void begin(void);
-	friend void dma_ch1_isr(void);
+	void begin(void);	
 };
-
-#endif
 
 #endif

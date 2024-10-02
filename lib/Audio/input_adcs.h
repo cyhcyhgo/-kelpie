@@ -27,43 +27,9 @@
 #ifndef input_adcs_h_
 #define input_adcs_h_
 
-#include "Arduino.h"
-#include "AudioStream.h"
-
-#if defined(ARDUINO_ARCH_SAMD)
-
-#include "Adafruit_ZeroDMA.h"
-
-class AudioInputAnalogStereo : public AudioStream
-{
-	public:
-	AudioInputAnalogStereo() : AudioStream(0, NULL) {
-		init(A2, A3);
-	}
-	AudioInputAnalogStereo(uint8_t pin0, uint8_t pin1) : AudioStream(0, NULL) {
-		init(pin0, pin1);
-	}
-	virtual void update(void);
-	private:
-	static audio_block_t *block_left;
-	static audio_block_t *block_right;
-	static uint16_t offset_left;
-	static uint16_t offset_right;
-	static int32_t hpf_y1[2];
-	static int32_t hpf_x1[2];
-
-	static bool update_responsibility;
-	static Adafruit_ZeroDMA *dma0;
-	static Adafruit_ZeroDMA *dma1;
-	static DmacDescriptor *desc;
-	static void isr0(Adafruit_ZeroDMA *dma);
-	static void isr1(Adafruit_ZeroDMA *dma);
-	static void init(uint8_t pin0, uint8_t pin1);
-};
-
-#else
-
-#include "DMAChannel.h"
+#include <Arduino.h>     // github.com/PaulStoffregen/cores/blob/master/teensy4/Arduino.h
+#include <AudioStream.h> // github.com/PaulStoffregen/cores/blob/master/teensy4/AudioStream.h
+#include <DMAChannel.h>  // github.com/PaulStoffregen/cores/blob/master/teensy4/DMAChannel.h
 
 class AudioInputAnalogStereo : public AudioStream
 {
@@ -90,7 +56,5 @@ private:
         static void isr1(void);
         static void init(uint8_t pin0, uint8_t pin1);
 };
-
-#endif
 
 #endif

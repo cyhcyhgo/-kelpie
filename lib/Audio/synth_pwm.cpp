@@ -24,11 +24,12 @@
  * THE SOFTWARE.
  */
 
+#include <Arduino.h>
 #include "synth_pwm.h"
 #include "utility/dspinst.h"
 
 
-#if defined(KINETISK) || defined(__SAMD51__)
+#if defined(__ARM_ARCH_7EM__)
 
 void AudioSynthWaveformPWM::update(void)
 {

@@ -24,13 +24,8 @@
  * THE SOFTWARE.
  */
 
-#include "effect_delay_ext.h"
-
-#if defined(ARDUINO_ARCH_SAMD)
 #include <Arduino.h>
-#define digitalWriteFast digitalWrite
-#endif
-
+#include "effect_delay_ext.h"
 
 //#define INTERNAL_TEST
 
@@ -129,11 +124,9 @@ void AudioEffectDelayExternal::initialize(AudioEffectDelayMemoryType_t type, uin
 	head_offset = 0;
 	memory_type = type;
 
-#if !defined(ARDUINO_ARCH_SAMD)
 	SPI.setMOSI(SPIRAM_MOSI_PIN);
 	SPI.setMISO(SPIRAM_MISO_PIN);
 	SPI.setSCK(SPIRAM_SCK_PIN);
-#endif
 
 	SPI.begin();	
 	
@@ -296,4 +289,3 @@ void AudioEffectDelayExternal::write(uint32_t offset, uint32_t count, const int1
 	}
 #endif
 }
-

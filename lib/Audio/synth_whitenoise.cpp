@@ -24,6 +24,7 @@
  * THE SOFTWARE.
  */
 
+#include <Arduino.h>
 #include "synth_whitenoise.h"
 
 // Park-Miller-Carta Pseudo-Random Number Generator
@@ -34,7 +35,7 @@ void AudioSynthNoiseWhite::update(void)
 	audio_block_t *block;
 	uint32_t *p, *end;
 	int32_t n1, n2, gain;
-	uint32_t lo, hi, val1, val2;
+	uint32_t lo, hi;
 
 	gain = level;
 	if (gain == 0) return;
@@ -44,7 +45,9 @@ void AudioSynthNoiseWhite::update(void)
 	end = p + AUDIO_BLOCK_SAMPLES/2;
 	lo = seed;
 	do {
-#if defined(KINETISK) || defined(__SAMD51__)
+#if defined(__ARM_ARCH_7EM__)
+		uint32_t val1, val2;
+		
 		hi = multiply_16bx16t(16807, lo); // 16807 * (lo >> 16)
 		lo = 16807 * (lo & 0xFFFF);
 		lo += (hi & 0x7FFF) << 16;
@@ -74,6 +77,8 @@ void AudioSynthNoiseWhite::update(void)
 		*p++ = val1;
 		*p++ = val2;
 #elif defined(KINETISL)
+		uint32_t val1;
+		
 		hi = 16807 * (lo >> 16);
 		lo = 16807 * (lo & 0xFFFF);
 		lo += (hi & 0x7FFF) << 16;

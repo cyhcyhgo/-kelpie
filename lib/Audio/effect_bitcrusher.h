@@ -28,8 +28,8 @@
 #ifndef effect_bitcrusher_h_
 #define effect_bitcrusher_h_
 
-#include "Arduino.h"
-#include "AudioStream.h"
+#include <Arduino.h>     // github.com/PaulStoffregen/cores/blob/master/teensy4/Arduino.h
+#include <AudioStream.h> // github.com/PaulStoffregen/cores/blob/master/teensy4/AudioStream.h
 
 class AudioEffectBitcrusher : public AudioStream
 {
@@ -42,7 +42,7 @@ public:
 		crushBits = b;
 	}
         void sampleRate(float hz) {
-		int n = (AUDIO_SAMPLE_RATE_EXACT / hz) + 0.5;
+		int n = (AUDIO_SAMPLE_RATE_EXACT / hz) + 0.5f;
 		if (n < 1) n = 1;
 		else if (n > 64) n = 64;
 		sampleStep = n;
